@@ -41,20 +41,26 @@ if __name__ == "__main__":
     
     prompt = "Say a short sentance."
     # checkpoint = "EleutherAI/pythia-1.4b-deduped"
-    checkpoint = "EleutherAI/pythia-2.8b-deduped"
-    assistant_checkpoint_1 = "EleutherAI/pythia-160m-deduped"
-    assistant_checkpoint_2 = "EleutherAI/pythia-1.4b-deduped"
-    assistant_model = "EleutherAI/pythia-160m-deduped"
+    checkpoint = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    #assistant_checkpoint_1 = "EleutherAI/pythia-160m-deduped"
+    #assistant_checkpoint_2 = "EleutherAI/pythia-1.4b-deduped"
+    #assistant_model = "EleutherAI/pythia-160m-deduped"
     
     # checkpoint = "meta-llama/Llama-2-7b-chat-hf"
     # assistant_checkpoint = "PY007/TinyLlama-1.1B-Chat-v0.1"
+    #from transformers.models.llama import modeling_llama
+    #from transformers.models.llama import modeling_llama_lade
+    #modeling_llama.LlamaForCausalLM = modeling_llama_lade.LlamaForCausalLM 
+    #modeling_llama.LlamaForCausalLM.jforward_multilevel = modeling_llama_lade.LlamaForCausalLM.jforward_multilevel
+    #modeling_llama.LlamaModel.LlamaModeljforward = modeling_llama_lade.LlamaModel.LlamaModeljforward
+    #modeling_llama.LlamaModel.j_prepare_decoder_attention_mask = modeling_llama_lade.LlamaModel.j_prepare_decoder_attention_mask  
     
     tokenizer = AutoTokenizer.from_pretrained(checkpoint)
     inputs = tokenizer(prompt, return_tensors="pt")
     model = AutoModelForCausalLM.from_pretrained(checkpoint)
-    assistant_model_1 = AutoModelForCausalLM.from_pretrained(assistant_checkpoint_1)
-    assistant_model_2 = AutoModelForCausalLM.from_pretrained(assistant_checkpoint_2)
-    assistant_model = AutoModelForCausalLM.from_pretrained(assistant_model)
+    #assistant_model_1 = AutoModelForCausalLM.from_pretrained(assistant_checkpoint_1)
+    #assistant_model_2 = AutoModelForCausalLM.from_pretrained(assistant_checkpoint_2)
+    #assistant_model = AutoModelForCausalLM.from_pretrained(assistant_model)
     
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     print(device)
@@ -63,10 +69,11 @@ if __name__ == "__main__":
 
     inputs.to(device)
     
-    assistant_model_1.to(device)
+    #assistant_model_1.to(device)
     model.to(device)
-    assistant_model_2.to(device)
-    assisted_time_2 = staged_assisted_generate_with_time(model, assistant_model_1, assistant_model_2, inputs)
+    #assistant_model_2.to(device)
+    ass, time0 = generate_with_time(model, inputs)
+    print((ass.numel()-inputs['input_ids'].numel())/time0)
     
     # assistant_model.to(device)
 
@@ -77,7 +84,7 @@ if __name__ == "__main__":
     # logger.info(f"Assisted generation time 2: {assisted_time_2[1]}")
     # log decoded outputs by tokenizers
     # logger.info(tokenizer.decode(raw_time[0][0]))
-    logger.info(tokenizer.decode(assisted_time_2[0][0]))
+    logger.info(tokenizer.decode(ass[0][0]))
     
     # use tokenizers to decode the outputs
     # logger.info(tokenizer.decode(raw_time[0][0]))

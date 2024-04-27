@@ -60,6 +60,7 @@ class GenerationMode(ExplicitEnum):
     
     
     STAGED_SPECULATION = "staged_speculation" # 8803 staged feature
+    LADE = "LADE" # 8803 LADE
 
 
 class GenerationConfig(PushToHubMixin):
@@ -409,7 +410,7 @@ class GenerationConfig(PushToHubMixin):
     def __repr__(self):
         return f"{self.__class__.__name__} {self.to_json_string(ignore_metadata=True)}"
 
-    def get_generation_mode(self, assistant_model: Optional["PreTrainedModel"] = None, secondary_assistant_model: Optional["PreTrainedModel"] = None) -> GenerationMode:
+    def get_generation_mode(self, assistant_model: Optional["PreTrainedModel"] = None, secondary_assistant_model: Optional["PreTrainedModel"] = None, win:Optional[int] = None) -> GenerationMode:
         """
         Returns the generation mode triggered by the [`GenerationConfig`] instance.
 
@@ -460,6 +461,10 @@ class GenerationConfig(PushToHubMixin):
         
         if secondary_assistant_model is not None:
             generation_mode = GenerationMode.STAGED_SPECULATION
+
+        #LADE
+        if win is not None:
+            generation_mode = GenerationMode.LADE
                 
                 
         return generation_mode
