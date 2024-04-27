@@ -8,7 +8,7 @@ import transformers
 
 def generate_with_time(model, inputs, **kwargs):
     start_time = time.time()
-    outputs = model.generate(**inputs, **kwargs)
+    outputs = model.generate(**inputs,win=10,lev=5,guess=10, **kwargs)
     generation_time = time.time() - start_time
     return outputs, generation_time
 
@@ -48,16 +48,30 @@ if __name__ == "__main__":
     
     # checkpoint = "meta-llama/Llama-2-7b-chat-hf"
     # assistant_checkpoint = "PY007/TinyLlama-1.1B-Chat-v0.1"
-    #from transformers.models.llama import modeling_llama
-    #from transformers.models.llama import modeling_llama_lade
-    #modeling_llama.LlamaForCausalLM = modeling_llama_lade.LlamaForCausalLM 
-    #modeling_llama.LlamaForCausalLM.jforward_multilevel = modeling_llama_lade.LlamaForCausalLM.jforward_multilevel
-    #modeling_llama.LlamaModel.LlamaModeljforward = modeling_llama_lade.LlamaModel.LlamaModeljforward
-    #modeling_llama.LlamaModel.j_prepare_decoder_attention_mask = modeling_llama_lade.LlamaModel.j_prepare_decoder_attention_mask  
+    from transformers.models.llama import modeling_llama
+    from transformers.models.llama import lade_modeling_llama
+    modeling_llama.LlamaForCausalLM = lade_modeling_llama.LlamaForCausalLM 
+    modeling_llama.LlamaForCausalLM.jforward_multilevel = lade_modeling_llama.LlamaForCausalLM.jforward_multilevel
+    modeling_llama.LlamaModel.LlamaModeljforward = lade_modeling_llama.LlamaModel.LlamaModeljforward
+    modeling_llama.LlamaModel.j_prepare_decoder_attention_mask = lade_modeling_llama.LlamaModel.j_prepare_decoder_attention_mask
+    #import inspect
+    #s = {}
+    #for name, cls in inspect.getmembers(modeling_llama, inspect.isclass):
+    #    s[name] = cls 
+    #for name, cls in inspect.getmembers(lade_modeling_llama, inspect.isclass):
+    #    if str(cls.__module__).startswith("lade") and name in s:
+    #        tc = s[name]
+    #        for method_name in dir(cls):
+    #            if callable(getattr(cls, method_name)):
+    #                try:
+    #                    setattr(tc, method_name, getattr(cls, method_name))
+    #                except:
+    #                    pass 
     
     tokenizer = AutoTokenizer.from_pretrained(checkpoint)
     inputs = tokenizer(prompt, return_tensors="pt")
     model = AutoModelForCausalLM.from_pretrained(checkpoint)
+    
     #assistant_model_1 = AutoModelForCausalLM.from_pretrained(assistant_checkpoint_1)
     #assistant_model_2 = AutoModelForCausalLM.from_pretrained(assistant_checkpoint_2)
     #assistant_model = AutoModelForCausalLM.from_pretrained(assistant_model)
@@ -84,7 +98,7 @@ if __name__ == "__main__":
     # logger.info(f"Assisted generation time 2: {assisted_time_2[1]}")
     # log decoded outputs by tokenizers
     # logger.info(tokenizer.decode(raw_time[0][0]))
-    logger.info(tokenizer.decode(ass[0][0]))
+    logger.info(tokenizer.decode(ass[0]))
     
     # use tokenizers to decode the outputs
     # logger.info(tokenizer.decode(raw_time[0][0]))
